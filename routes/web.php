@@ -3,9 +3,10 @@
  use Illuminate\Support\Facades\Route;
  use app\Models\Users;
  use app\Models\Comment;
- use App\Http\Controllers\UserController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\CommentController;
+ use App\Http\Controllers\GameController;
+ use App\Http\Controllers\CategoryController;
+ use App\Http\Controllers\PlatformController;
+
 
  // Route::get('/', function () {
  //     return view('welcome');
@@ -15,8 +16,11 @@ use App\Http\Controllers\CommentController;
  // });
 
 
- Route::resource('users', UserController::class);
- Route::resource('posts', PostController::class);
- Route::resource('comments', CommentController::class);
+ Route::get('/', function () {
+      return redirect()->route('games.index');
+ });
+ Route::resource('games', GameController::class);
+ Route::resource('categories', CategoryController::class);
+ Route::resource('platforms', PlatformController::class);
 
 
