@@ -21,9 +21,9 @@ class GameController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'release_date' => 'nullable|date',
-            'description' => 'nullable|string',
+          'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'price' => 'required|numeric',
         ], [
             'title.required' => 'عنوان بازی الزامی است.',
             'title.max' => 'عنوان بازی نباید بیش از ۲۵۵ کاراکتر باشد.',
@@ -31,6 +31,7 @@ class GameController extends Controller
         ]);
 
         Game::create($validated);
+ 
 
         return redirect()->route('games.index')->with('success', 'بازی جدید با موفقیت افزوده شد ✅');
     }

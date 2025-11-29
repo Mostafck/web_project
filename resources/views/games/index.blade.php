@@ -28,19 +28,26 @@
         <table class="table table-bordered table-striped align-middle">
             <thead class="table-dark">
                 <tr>
-                    <th>شناسه</th>
-                    <th>عنوان</th>
-                    <th>تاریخ انتشار</th>
-                    <th>عملیات</th>
+                    <th>نام بازی</th>
+                    <th>دسته</th>
+                    <th>پلتفرم</th>
+                    <th>قیمت</th>
+                    <th>سبد خرید</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($games as $game)
                     <tr>
-                        <td>{{ $game->id }}</td>
                         <td>{{ $game->title }}</td>
-                        <td>{{ $game->release_date ?? '—' }}</td>
+                        <td>{{ $game->category->name ?? '-' }}</td>
+                        <td>{{ $game->platform->name ?? '-' }}</td>
+                        <td>{{ number_format($game->price) }} تومان</td>
                         <td>
+                            <form action="{{ route('orders.add', $game->id) }}" method="POST">
+                          @csrf
+                            <button class="btn btn-success btn-sm">افزودن به سبد خرید</button>
+                            </form>
+
                             <a href="{{ route('games.show', $game->id) }}" class="btn btn-info btn-sm">نمایش</a>
                             <a href="{{ route('games.edit', $game->id) }}" class="btn btn-warning btn-sm">ویرایش</a>
 
