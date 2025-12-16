@@ -19,4 +19,5 @@
   </body>
     </html>
 </html>
+
 <?php /**PATH /home/sermostafack/projects/web_project/resources/views/login.blade.php ENDPATH**/ ?>

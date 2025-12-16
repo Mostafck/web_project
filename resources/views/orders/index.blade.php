@@ -1,36 +1,46 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-    <meta charset="UTF-8">
-    <title>سفارش‌ها</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+@extends('layouts.admin')
 
-<body class="p-4" dir="rtl">
+@section('title', 'سبد خرید')
 
-    <h2 class="mb-3">لیست سفارش‌ها</h2>
+@section('content')
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>شماره سفارش</th>
-                <th>نام بازی</th>
-                <th>قیمت</th>
-                <th>تاریخ</th>
-            </tr>
-        </thead>
+<h3>🛒 سبد خرید</h3>
 
-        <tbody>
-            @foreach ($orders as $order)
-            <tr>
-                <td>{{ $order->id }}</td>
-                <td>{{ $order->game_title }}</td>
-                <td>{{ number_format($order->price) }} تومان</td>
-                <td>{{ $order->created_at }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+@if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
 
-</body>
-</html>
+@if($orders->isEmpty())
+    <div class="alert alert-warning">سبد خرید شما خالی است</div>
+@else
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-striped text-center">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>نام بازی</th>
+                        <th>قیمت</th>
+                        <th>وضعیت</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($orders as $order)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $order->game_title }}</td>
+                            <td>{{ number_format($order->price) }} تومان</td>
+                            <td>
+                                <span class="badge bg-warning">در انتظار پرداخت</span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+@endif
+
+@endsection

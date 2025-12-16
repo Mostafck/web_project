@@ -9,7 +9,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'avatar'];
+    protected $fillable = ['name','email','password','avatar','balance'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -33,4 +33,8 @@ class User extends Authenticatable
     public function news() {
         return $this->hasMany(News::class);
     }
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
+    
 }

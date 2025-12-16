@@ -1,6 +1,7 @@
 <!DOCTYPE html>
+<?php echo session('user_id'); ?>
 <html lang="fa">
-<head>
+<head >
   <meta charset="UTF-8">
   <title>تأیید کد پیامک 📱</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">

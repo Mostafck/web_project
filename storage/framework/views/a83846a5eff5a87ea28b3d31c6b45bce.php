@@ -2,13 +2,15 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>صفحه مدیریت</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+    <title><?php echo $__env->yieldContent('title', 'پنل مدیریت'); ?></title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
         body {
             direction: rtl;
             background: #f7f7f7;
+            margin: 0;
         }
 
         .sidebar {
@@ -38,49 +40,27 @@
             margin-right: 240px;
             padding: 30px;
         }
-
     </style>
 </head>
 <body>
 
 <!-- سایدبار -->
 <div class="sidebar">
-
     <h5 class="text-center">منوی مدیریت</h5>
     <hr class="bg-light">
 
-    <a href="{{ route('home') }}">🏠 داشبورد</a>
-    <a href="{{ route('games.index') }}">🎮 مدیریت بازی‌ها</a>
-    <a href="#">📂 دسته‌بندی‌ها</a>
-    <a href="#">🎮 پلتفرم‌ها</a>
-    <li class="nav-item">
-     <a href="{{ route('orders.index') }}" class="nav-link">
-        📦 مدیریت سفارش‌ها
-     </a>
-     </li>
-
-    <a href="#">👤 کاربران</a>
-    <a href="{{ route('login') }}">🚪 خروج</a>
+    <a href="<?php echo e(route('home')); ?>">🏠 داشبورد</a>
+    <a href="<?php echo e(route('games.index')); ?>">🎮 مدیریت بازی‌ها</a>
+    <a href="<?php echo e(route('cart.index')); ?>">🛒 سبد خرید</a>
+    <a href="<?php echo e(route('orders.index')); ?>">📦 مدیریت سفارش‌ها</a>
+    <a href="<?php echo e(route('login')); ?>">🚪 خروج</a>
 </div>
 
 <!-- محتوای اصلی -->
 <div class="content">
-
-    <h2>خوش آمدید 👋</h2>
-    <p>شما با موفقیت وارد پنل مدیریت شدید.</p>
-
-    <div class="card p-4 shadow-sm mt-3">
-        <h4>بخش‌های سایت:</h4>
-        <ul>
-            <li>مدیریت بازی‌ها</li>
-            <li>دسته‌بندی‌ها</li>
-            <li>پلتفرم‌ها</li>
-            <li>سفارش‌های کاربران</li>
-            <li>لیست کاربران</li>
-        </ul>
-    </div>
-
+    <?php echo $__env->yieldContent('content'); ?>
 </div>
 
 </body>
 </html>
+<?php /**PATH /home/sermostafack/projects/web_project/resources/views/layouts/admin.blade.php ENDPATH**/ ?>

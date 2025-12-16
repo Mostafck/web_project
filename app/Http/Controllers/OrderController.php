@@ -8,25 +8,48 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    // نمایش همه سفارش‌ها
+    // لیست سفارش‌ها
     public function index()
-    {
-        $orders = Order::latest()->get();
-        return view('admins.orders.index', compact('orders'));
+{
+    if (!session('logged_in')) {
+        return redirect()->route('login');
     }
 
-    // افزودن سفارش جدید (وقتی از Cart ایجاد می‌شود)
-    public function store(Request $request, $gameId)
-    {
-        $game = Game::findOrFail($gameId);
+    $orders = Order::where('user_id', session('user_id'))
+        ->latest()
+        ->get();
 
-        Order::create([
-            'game_id' => $game->id,
-            'game_title' => $game->title,
-            'price' => $game->price,
-        ]);
-
-        return redirect()->back()->with('success', 'سفارش ثبت شد!');
-    }
+    return view('orders.index', compact('orders'));
 }
 
+    // افزودن به سبد خرید
+   public function store($id)
+{
+    dd('store hit');
+    if (!session('logged_in')) {
+        return redirect()->route('login');
+    }
+
+    $game = Game::findOrFail($id);
+
+    $userId = session('user_id');
+
+    Order::create([
+        'user_id'    => $userId,
+        'game_id'    => $game->id,
+        'game_title' => $game->title,
+        'price'      => $game->price,
+        'status'     => 'pending',
+        'is_paid'    => false,
+    ]);
+
+    return back()->with('success', '✔ بازی به سبد خرید اضافه شد');
+}
+
+
+    public function destroy($id)
+    {
+        Order::findOrFail($id)->delete();
+        return back()->with('success', 'سفارش حذف شد');
+    }
+}

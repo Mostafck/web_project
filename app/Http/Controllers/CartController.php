@@ -2,59 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Order;
 use App\Models\Game;
+use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    // نمایش سبد خرید
-    public function index()
-    {
-        $cart = session('cart', []);
-        return view('cart.index', compact('cart'));
-    }
-
-    // افزودن محصول به سبد
     public function add($id)
     {
+        if (!session('logged_in')) {
+            return redirect()->route('login');
+        }
+
         $game = Game::findOrFail($id);
 
-        $cart = session()->get('cart', []);
+        Order::create([
+            'user_id'    => session('user_id'),
+            'user_name'  => 'admin', // فعلاً فیک
+            'game_id'    => $game->id,
+            'game_title' => $game->title,
+            'price'      => $game->price,
+            'status'     => 'pending',
+            'is_paid'    => false,
+        ]);
 
-        // اگر قبلاً در سبد بوده +۱ شود
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
-        } else {
-            $cart[$id] = [
-                'id'       => $game->id,
-                'title'    => $game->title,
-                'price'    => $game->price,
-                'quantity' => 1
-            ];
-        }
-
-        session()->put('cart', $cart);
-
-        return redirect()->back()->with('success', 'بازی به سبد خرید اضافه شد');
+        return back()->with('success', '✔ بازی به سبد خرید اضافه شد');
+    }
+    public function index()
+{
+    if (!session('logged_in')) {
+        return redirect()->route('login');
     }
 
-    // حذف از سبد
-    public function remove($id)
-    {
-        $cart = session('cart', []);
+    $orders = Order::where('user_id', session('user_id'))
+        ->where('status', 'pending')
+        ->get();
 
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
-        }
+    return view('cart.index', compact('orders'));
+}
 
-        return redirect()->route('cart.index');
-    }
 
-    // خالی کردن سبد خرید
-    public function clear()
-    {
-        session()->forget('cart');
-        return redirect()->route('cart.index');
-    }
 }

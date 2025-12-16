@@ -12,12 +12,25 @@ return new class extends Migration
 public function up()
 {
     Schema::create('orders', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedBigInteger('game_id');
-        $table->string('game_title');
-        $table->integer('price');
-        $table->timestamps();
-    });
+    $table->id();
+
+    $table->unsignedBigInteger('user_id');
+    $table->unsignedBigInteger('game_id');
+
+    $table->string('game_title');
+    $table->integer('price');
+
+    $table->enum('status', ['pending', 'completed', 'canceled'])
+          ->default('pending');
+
+    $table->boolean('is_paid')->default(false);
+
+    $table->timestamp('paid_at')->nullable();
+    $table->timestamp('completed_at')->nullable();
+
+    $table->timestamps();
+});
+
 }
 
 

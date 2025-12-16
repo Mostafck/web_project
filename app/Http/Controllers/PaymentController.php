@@ -2,41 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Shetabit\Payment\Facade\Payment;
+use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
-    public function pay()
+    public function pay(Order $order)
     {
-        $cart = session('cart', []);
-        $amount = 0;
+        $user = Auth::user();
 
-        foreach ($cart as $item) {
-            $amount += $item['price'] * $item['qty'];
+        // اگر سفارش قبلا پرداخت شده باشد
+        if ($order->status === 'paid') {
+            return back()->with('error', 'این سفارش قبلاً پرداخت شده است.');
         }
 
-        return Payment::callbackUrl(route('payment.verify'))
-            ->purchase(
-                amount: $amount,
-                callback: function ($driver, $transactionId) {
-                    session(['transaction_id' => $transactionId]);
-                }
-            )
-            ->pay()
-            ->render();
-    }
+        // بررسی موجودی
+        if ($user->balance < $order->price) {
+            return back()->with('error', 'موجودی کافی نیست!');
+        }
 
-    public function verify(Request $request)
-    {
-        $transactionId = session('transaction_id');
+        // از موجودی کم کن
+        $user->balance -= $order->price;
+        $user->save();
 
-        $receipt = Payment::amount(0)->transactionId($transactionId)->verify();
+        // وضعیت سفارش را paid کن
+        $order->status = 'paid';
+        $order->save();
 
-        session()->forget('cart');
-        session()->forget('transaction_id');
-
-        return "پرداخت با موفقیت انجام شد ✔️";
+        return back()->with('success', 'پرداخت با موفقیت انجام شد!');
     }
 }
-
