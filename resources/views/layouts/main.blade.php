@@ -4,24 +4,41 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'پنل مدیریت')</title>
 
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
             direction: rtl;
-            background: #f7f7f7;
             margin: 0;
         }
 
+        /* هدر بالای صفحه */
+        .top-header {
+            width: 100%;
+            height: 60px;
+            background: #343a40;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* سایدبار */
         .sidebar {
             width: 230px;
             height: 100vh;
             position: fixed;
             right: 0;
-            top: 0;
-            background: #343a40;
+            top: 60px; /* پایین هدر */
+            background: #495057;
             color: #fff;
-            padding-top: 30px;
+            padding-top: 20px;
         }
 
         .sidebar a {
@@ -33,22 +50,40 @@
         }
 
         .sidebar a:hover {
-            background: #495057;
+            background: #6c757d;
         }
 
+        /* محتوای اصلی */
         .content {
             margin-right: 240px;
-            padding: 30px;
+            padding: 80px 30px 30px 30px; /* بالای محتوا 80px برای هدر */
+            background: #f7f7f7;
+            min-height: 100vh;
         }
     </style>
 </head>
 <body>
 
+@php
+    use App\Models\User;
+
+    $user = null;
+    if(session('logged_in')) {
+        $user = User::find(session('user_id'));
+    }
+@endphp
+
+<!-- هدر بالای صفحه -->
+<div class="top-header">
+    @if($user)
+        <div class="fw-bold">
+            موجودی: <span class="badge bg-success">{{ number_format($user->balance) }} تومان</span>
+        </div>
+    @endif
+</div>
+
 <!-- سایدبار -->
 <div class="sidebar">
-    <h5 class="text-center">منوی مدیریت</h5>
-    <hr class="bg-light">
-
     <a href="{{ route('home') }}">🏠 داشبورد</a>
     <a href="{{ route('games.index') }}">🎮 مدیریت بازی‌ها</a>
     <a href="{{ route('cart.index') }}">🛒 سبد خرید</a>

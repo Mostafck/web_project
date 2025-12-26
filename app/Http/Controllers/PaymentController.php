@@ -2,34 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class PaymentController extends Controller
 {
-    public function pay(Order $order)
+    // نمایش فرم شارژ
+    public function showTopUpForm()
     {
-        $user = Auth::user();
+        return view('payment.topup');
+    }
 
-        // اگر سفارش قبلا پرداخت شده باشد
-        if ($order->status === 'paid') {
-            return back()->with('error', 'این سفارش قبلاً پرداخت شده است.');
+    // پردازش شارژ
+    public function topUp(Request $request)
+    {
+        if (!session('logged_in')) {
+            return redirect()->route('login');
         }
 
-        // بررسی موجودی
-        if ($user->balance < $order->price) {
-            return back()->with('error', 'موجودی کافی نیست!');
+        $request->validate([
+            'amount' => 'required|numeric|min:1000'
+        ]);
+
+        $user = User::find(session('user_id'));
+
+        if(!$user) {
+            return back()->withErrors('کاربر یافت نشد');
         }
 
-        // از موجودی کم کن
-        $user->balance -= $order->price;
-        $user->save();
+        // افزایش موجودی
+        $user->increment('balance', $request->amount);
 
-        // وضعیت سفارش را paid کن
-        $order->status = 'paid';
-        $order->save();
-
-        return back()->with('success', 'پرداخت با موفقیت انجام شد!');
+        return back()->with('success', 'موجودی شما با موفقیت شارژ شد');
     }
 }

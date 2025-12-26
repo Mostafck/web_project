@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    // افزودن به سبد خرید
     public function add($id)
     {
         if (!session('logged_in')) {
@@ -28,17 +29,64 @@ class CartController extends Controller
 
         return back()->with('success', '✔ بازی به سبد خرید اضافه شد');
     }
+
+    // نمایش سبد خرید
     public function index()
+    {
+        if (!session('logged_in')) {
+            return redirect()->route('login');
+        }
+
+        $orders = Order::where('user_id', session('user_id'))
+            ->where('status', 'pending')
+            ->get();
+
+        return view('cart.index', compact('orders'));
+    }
+
+    // حذف یک سفارش از سبد خرید
+    public function remove($id)
+    {
+        if (!session('logged_in')) {
+            return redirect()->route('login');
+        }
+
+        $order = Order::where('id', $id)
+            ->where('user_id', session('user_id'))
+            ->firstOrFail();
+
+        $order->delete();
+
+        return back()->with('success', '✔ سفارش حذف شد');
+    }
+    public function complete($id)
 {
     if (!session('logged_in')) {
         return redirect()->route('login');
     }
 
-    $orders = Order::where('user_id', session('user_id'))
+    $order = Order::where('id', $id)
+        ->where('user_id', session('user_id'))
         ->where('status', 'pending')
-        ->get();
+        ->firstOrFail();
 
-    return view('cart.index', compact('orders'));
+    $user = \App\Models\User::find(session('user_id'));
+
+    // بررسی موجودی
+    if ($user->balance < $order->price) {
+        return back()->with('error', '⚠ موجودی شما کافی نیست');
+    }
+
+    // کم کردن موجودی
+    $user->decrement('balance', $order->price);
+
+    // تغییر وضعیت سفارش
+    $order->update([
+        'status' => 'completed',
+        'is_paid' => true
+    ]);
+
+    return back()->with('success', '✔ پرداخت با موفقیت انجام شد و سفارش تکمیل شد');
 }
 
 

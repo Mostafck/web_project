@@ -25,7 +25,6 @@ class OrderController extends Controller
     // افزودن به سبد خرید
    public function store($id)
 {
-    dd('store hit');
     if (!session('logged_in')) {
         return redirect()->route('login');
     }

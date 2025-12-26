@@ -12,6 +12,8 @@
  use App\Http\Controllers\OrderController;
  use App\Http\Controllers\PaymentController;
  use Illuminate\Support\Facades\Mail;
+ use App\Models\User;
+
 
 
  // Route::get('/', function () {
@@ -43,10 +45,15 @@
 |--------------------------------------------------------------------------
 */
 
-// صفحه لاگین
+
+
+/*
+|--------------------------------------------------------------------------
+| صفحه لاگین
+|--------------------------------------------------------------------------
+*/
 Route::get('/login', fn () => view('login'))->name('login');
 
-// پردازش نام کاربری و رمز عبور
 Route::post('/login', function (Request $request) {
 
     if ($request->username === 'admin' && $request->password === '123456') {
@@ -62,8 +69,11 @@ Route::post('/login', function (Request $request) {
     return back()->withErrors(['msg' => 'نام کاربری یا رمز عبور اشتباه است']);
 })->name('login.do');
 
-
-// صفحه وارد کردن ایمیل
+/*
+|--------------------------------------------------------------------------
+| وارد کردن ایمیل
+|--------------------------------------------------------------------------
+*/
 Route::get('/email-verify', function () {
     if (!session('step_login_ok')) {
         return redirect()->route('login');
@@ -71,8 +81,11 @@ Route::get('/email-verify', function () {
     return view('email_verify');
 })->name('email.verify');
 
-
-// ارسال کد به ایمیل
+/*
+|--------------------------------------------------------------------------
+| ارسال کد ایمیل
+|--------------------------------------------------------------------------
+*/
 Route::post('/email-send', function (Request $request) {
 
     if (!session('step_login_ok')) {
@@ -98,8 +111,11 @@ Route::post('/email-send', function (Request $request) {
     return redirect()->route('email.check');
 })->name('email.send');
 
-
-// صفحه وارد کردن کد ایمیل
+/*
+|--------------------------------------------------------------------------
+| صفحه وارد کردن کد ایمیل
+|--------------------------------------------------------------------------
+*/
 Route::get('/email-check', function () {
     if (!session('email_code')) {
         return redirect()->route('email.verify');
@@ -107,18 +123,31 @@ Route::get('/email-check', function () {
     return view('email_check');
 })->name('email.check');
 
-
-// بررسی کد ایمیل
+/*
+|--------------------------------------------------------------------------
+| بررسی کد ایمیل و ورود
+|--------------------------------------------------------------------------
+*/
 Route::post('/email-check', function (Request $request) {
 
     if ((int)$request->code === session('email_code')) {
 
+        // کاربر فیک
+        $user = User::firstOrCreate(
+            ['id' => 1],
+            ['name' => 'admin', 'email' => session('email_address'), 'password' => bcrypt('123456')]
+        );
+
+        // تنظیم بالانس اولیه
+        if (!$user->balance) {
+            $user->balance = 150000;
+            $user->save();
+        }
+
         session([
             'logged_in' => true,
             'user_verified' => true,
-            'user_id' => 1,           // یوزر فیک
-            'balance' => 150000,       // موجودی اولیه
-            'cart' => []
+            'user_id' => $user->id
         ]);
 
         session()->forget(['email_code', 'step_login_ok']);
@@ -129,39 +158,35 @@ Route::post('/email-check', function (Request $request) {
     return back()->withErrors(['msg' => 'کد وارد شده اشتباه است']);
 })->name('email.check.do');
 
-
 /*
 |--------------------------------------------------------------------------
-| Home
+| خانه / داشبورد
 |--------------------------------------------------------------------------
 */
-
 Route::get('/home', function () {
     if (!session('logged_in')) {
         return redirect()->route('login');
     }
-    return view('home');
+
+    $user = \App\Models\User::find(session('user_id'));
+
+    return view('home', compact('user'));
 })->name('home');
 
-// روت اصلی
 Route::get('/', fn () => redirect()->route('home'));
-
 
 /*
 |--------------------------------------------------------------------------
 | Games CRUD
 |--------------------------------------------------------------------------
 */
-
-Route::resource('games', GameController::class);
-
+Route::resource('games', \App\Http\Controllers\GameController::class);
 
 /*
 |--------------------------------------------------------------------------
 | Cart Routes
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('cart.index');
     Route::post('/add/{id}', [CartController::class, 'add'])->name('cart.add');
@@ -170,13 +195,11 @@ Route::prefix('cart')->group(function () {
     Route::post('/complete/{order}', [CartController::class, 'complete'])->name('cart.complete');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Orders Routes
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/add/{id}', [OrderController::class, 'store'])->name('orders.add');
@@ -184,23 +207,19 @@ Route::prefix('orders')->group(function () {
     Route::post('/complete/{id}', [OrderController::class, 'complete'])->name('orders.complete');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Admin Orders
 |--------------------------------------------------------------------------
 */
-
 Route::get('/admins/orders', [OrderController::class, 'index'])
     ->name('admins.orders.index');
-
 
 /*
 |--------------------------------------------------------------------------
 | Payment Routes
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('payment')->group(function () {
     Route::get('/topup', [PaymentController::class, 'showTopUpForm'])->name('payment.topup');
     Route::post('/topup', [PaymentController::class, 'topUp'])->name('payment.topup.do');
@@ -209,3 +228,19 @@ Route::prefix('payment')->group(function () {
 
 // پرداخت سفارش
 Route::get('/pay/{order}', [PaymentController::class, 'pay'])->name('pay');
+/*
+|--------------------------------------------------------------------------
+| Balanc Charging
+|--------------------------------------------------------------------------
+*/
+// نمایش فرم شارژ کیف پول
+Route::get('/payment/topup', [PaymentController::class, 'showTopUpForm'])->name('payment.topup');
+
+// پردازش شارژ کیف پول
+Route::post('/payment/topup', [PaymentController::class, 'topUp'])->name('payment.topup.do');
+
+
+
+
+
+

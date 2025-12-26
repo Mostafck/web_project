@@ -1,5 +1,83 @@
-<form method="POST" action="{{ route('email.send') }}">
+<style>
+    .email-form {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #fff8f0;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+    }
+
+    .email-form h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #ff5722;
+    }
+
+    .email-form input[type="email"] {
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: border 0.3s;
+    }
+
+    .email-form input[type="email"]:focus {
+        border-color: #ff5722;
+        outline: none;
+    }
+
+    .email-form button {
+        width: 100%;
+        padding: 12px;
+        background-color: #ff5722;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .email-form button:hover {
+        background-color: #e64a19;
+    }
+
+    .email-form .message {
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .email-form .message.success {
+        color: green;
+    }
+
+    .email-form .message.error {
+        color: red;
+    }
+</style>
+
+<form method="POST" action="{{ route('email.send') }}" class="email-form">
     @csrf
+    <h2>ارسال کد به ایمیل</h2>
+
+    @if(session('success'))
+        <div class="message success">{{ session('success') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="message error">
+            @foreach($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
+
     <input type="email" name="email" placeholder="ایمیل خود را وارد کنید">
     <button>ارسال کد</button>
 </form>
+
